@@ -81,8 +81,6 @@ fun TimerScreen(
 
     var showNoiseSheet by remember { mutableStateOf(false) }
     var showAppDrawer by remember { mutableStateOf(false) }
-    var isRearranging by remember { mutableStateOf(false) }
-    var draggedApp: com.echoran.flowfocus.data.model.WhitelistedAppEntity? by remember { mutableStateOf(null) }
 
     androidx.compose.runtime.LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
@@ -135,9 +133,12 @@ fun TimerScreen(
                 Button(
                     onClick = { viewModel.stopTimer() },
                     shape = CircleShape,
-                    modifier = Modifier.size(64.dp)
+                    modifier = Modifier.size(80.dp)
                 ) {
-                    Text("停止")
+                    Text(
+                        text = "停止",
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
@@ -245,7 +246,6 @@ fun TimerScreen(
         ModalBottomSheet(
             onDismissRequest = { 
                 showAppDrawer = false 
-                isRearranging = false
             },
             sheetState = rememberModalBottomSheetState()
         ) {
@@ -265,19 +265,10 @@ fun TimerScreen(
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
-                    Button(
-                        onClick = { isRearranging = !isRearranging },
-                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                            containerColor = if (isRearranging) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = if (isRearranging) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                    ) {
-                        Text(if (isRearranging) "完成排序" else "调整顺序")
-                    }
                 }
 
                 Text(
-                    text = if (isRearranging) "长按并拖动应用图标来调整顺序" else "点击应用图标来打开应用",
+                    text = "点击应用图标来打开应用",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -290,19 +281,7 @@ fun TimerScreen(
                 ) {
                     items(whitelistedApps) {
                         AppItem(
-                            app = it,
-                            isRearranging = isRearranging,
-                            onDragStart = { draggedApp = it },
-                            onDragEnd = { draggedApp = null },
-                            onDragOver = { targetApp ->
-                                // Handle drag over logic
-                                if (draggedApp != null && draggedApp != targetApp) {
-                                    // Here you would implement the actual reordering logic
-                                    // This would require updating the order in the database
-                                    // For now, we'll just log the action
-                                    android.util.Log.d("AppDrawer", "Dragging ${draggedApp?.appName} over ${targetApp.appName}")
-                                }
-                            }
+                            app = it
                         )
                     }
                 }
@@ -346,11 +325,7 @@ fun TimerDisplay(timeRemaining: Long, totalTime: Long) {
 
 @Composable
 fun AppItem(
-    app: com.echoran.flowfocus.data.model.WhitelistedAppEntity,
-    isRearranging: Boolean,
-    onDragStart: (com.echoran.flowfocus.data.model.WhitelistedAppEntity) -> Unit,
-    onDragEnd: () -> Unit,
-    onDragOver: (com.echoran.flowfocus.data.model.WhitelistedAppEntity) -> Unit
+    app: com.echoran.flowfocus.data.model.WhitelistedAppEntity
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val appIcon = remember {
@@ -365,25 +340,11 @@ fun AppItem(
         modifier = Modifier
             .padding(8.dp)
             .clickable {
-                if (!isRearranging) {
-                    // Launch the app
-                    val intent = context.packageManager.getLaunchIntentForPackage(app.packageName)
-                    if (intent != null) {
-                        context.startActivity(intent)
-                    }
+                // Launch the app
+                val intent = context.packageManager.getLaunchIntentForPackage(app.packageName)
+                if (intent != null) {
+                    context.startActivity(intent)
                 }
-            }
-            .pointerInput(Unit) {
-                detectDragGestures(
-                    onDragStart = { if (isRearranging) onDragStart(app) },
-                    onDragEnd = { if (isRearranging) onDragEnd() },
-                    onDrag = { change, dragAmount ->
-                        if (isRearranging) {
-                            change.consume()
-                            // Handle drag position updates
-                        }
-                    }
-                )
             },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -391,7 +352,7 @@ fun AppItem(
         androidx.compose.material3.Card(
             modifier = Modifier.size(64.dp),
             shape = androidx.compose.foundation.shape.CircleShape,
-            elevation = if (isRearranging) androidx.compose.material3.CardDefaults.cardElevation(defaultElevation = 8.dp) else androidx.compose.material3.CardDefaults.cardElevation()
+            elevation = androidx.compose.material3.CardDefaults.cardElevation()
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
