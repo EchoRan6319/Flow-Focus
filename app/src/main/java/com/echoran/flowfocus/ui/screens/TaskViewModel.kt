@@ -62,4 +62,10 @@ class TaskViewModel @Inject constructor(
             }
         }
     }
+
+    fun updateTask(task: TaskEntity) {
+        viewModelScope.launch {
+            taskRepository.updateTask(task)
+        }
+    }
 }

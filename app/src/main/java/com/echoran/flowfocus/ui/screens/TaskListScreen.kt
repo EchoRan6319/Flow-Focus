@@ -1,14 +1,13 @@
 package com.echoran.flowfocus.ui.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,21 +24,22 @@ import com.echoran.flowfocus.data.model.TaskEntity
 @Composable
 fun TaskListScreen(
     viewModel: TaskViewModel = hiltViewModel(),
-    onNavigateToTimer: (Long) -> Unit // Optional navigation callback
+    onNavigateToTimer: (Long) -> Unit
 ) {
     val tasks by viewModel.allTasks.collectAsState(initial = emptyList())
     var showAddTaskDialog by remember { mutableStateOf(false) }
+    var showEditMenu by remember { mutableStateOf(false) }
+    var selectedTask by remember { mutableStateOf<TaskEntity?>(null) }
+    var showEditTaskDialog by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
-                .padding(16.dp)
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
         ) {
             Text("待办清单", fontSize = 24.sp, fontWeight = FontWeight.Bold)
             
-            // Re-using the same spacing as Statistics/Settings
             Spacer(modifier = Modifier.height(16.dp))
 
             if (tasks.isEmpty()) {
@@ -51,10 +51,11 @@ fun TaskListScreen(
                     items(tasks) { task ->
                         TaskItem(
                             task = task,
-                            onDelete = { viewModel.deleteTask(task) },
                             onClick = { onNavigateToTimer(task.id) },
-                            onMoveUp = { viewModel.moveTaskUp(task, tasks) },
-                            onMoveDown = { viewModel.moveTaskDown(task, tasks) }
+                            onLongClick = {
+                                selectedTask = task
+                                showEditMenu = true
+                            }
                         )
                     }
                 }
@@ -79,16 +80,48 @@ fun TaskListScreen(
                 }
             )
         }
+
+        if (showEditTaskDialog && selectedTask != null) {
+            EditTaskDialog(
+                task = selectedTask!!,
+                onDismiss = { showEditTaskDialog = false },
+                onUpdate = { updatedTask ->
+                    viewModel.updateTask(updatedTask)
+                    showEditTaskDialog = false
+                    showEditMenu = false
+                }
+            )
+        }
+
+        if (showEditMenu && selectedTask != null) {
+            EditTaskMenu(
+                task = selectedTask!!,
+                tasks = tasks,
+                onDismiss = { showEditMenu = false },
+                onEdit = { showEditTaskDialog = true },
+                onDelete = {
+                    viewModel.deleteTask(selectedTask!!)
+                    showEditMenu = false
+                },
+                onMoveUp = {
+                    viewModel.moveTaskUp(selectedTask!!, tasks)
+                    showEditMenu = false
+                },
+                onMoveDown = {
+                    viewModel.moveTaskDown(selectedTask!!, tasks)
+                    showEditMenu = false
+                }
+            )
+        }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskItem(
     task: TaskEntity,
-    onDelete: () -> Unit,
     onClick: () -> Unit,
-    onMoveUp: () -> Unit,
-    onMoveDown: () -> Unit
+    onLongClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -99,7 +132,13 @@ fun TaskItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = { onClick() },
+                        onLongPress = { onLongClick() }
+                    )
+                },
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
@@ -113,19 +152,8 @@ fun TaskItem(
                 Text(text = modeText, fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
             }
             
-            Row {
-                IconButton(onClick = onMoveUp) {
-                    Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "上移")
-                }
-                IconButton(onClick = onMoveDown) {
-                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "下移")
-                }
-                IconButton(onClick = onClick) {
-                    Icon(Icons.Filled.PlayArrow, contentDescription = "开始专注", tint = MaterialTheme.colorScheme.primary)
-                }
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Filled.Delete, contentDescription = "删除任务", tint = MaterialTheme.colorScheme.error)
-                }
+            IconButton(onClick = onClick) {
+                Icon(Icons.Filled.PlayArrow, contentDescription = "开始专注", tint = MaterialTheme.colorScheme.primary)
             }
         }
     }
@@ -199,6 +227,163 @@ fun AddTaskDialog(onDismiss: () -> Unit, onAdd: (String, String, String, Int) ->
                 enabled = title.isNotBlank()
             ) {
                 Text("添加")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("取消")
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditTaskMenu(
+    task: TaskEntity,
+    tasks: List<TaskEntity>,
+    onDismiss: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    onMoveUp: () -> Unit,
+    onMoveDown: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("编辑任务") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("选择操作:")
+            }
+        },
+        confirmButton = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = onEdit,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("编辑待办事项")
+                }
+                
+                Button(
+                    onClick = onMoveUp,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = tasks.indexOf(task) > 0
+                ) {
+                    Text("上移")
+                }
+                
+                Button(
+                    onClick = onMoveDown,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = tasks.indexOf(task) < tasks.size - 1
+                ) {
+                    Text("下移")
+                }
+                
+                Button(
+                    onClick = onDelete,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                ) {
+                    Text("删除待办事项")
+                }
+                
+                TextButton(onClick = onDismiss) {
+                    Text("取消")
+                }
+            }
+        },
+        dismissButton = {}
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditTaskDialog(
+    task: TaskEntity,
+    onDismiss: () -> Unit,
+    onUpdate: (TaskEntity) -> Unit
+) {
+    var title by remember { mutableStateOf(task.title) }
+    var description by remember { mutableStateOf(task.description) }
+    var timerMode by remember { mutableStateOf(task.timerMode) }
+    var duration by remember { mutableStateOf(task.pomodoroDuration.toString()) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("编辑任务") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                // 任务基本信息
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("任务标题") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("任务描述 (可选)") },
+                    minLines = 2,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                // 时间设置
+                Text("计时模式", style = MaterialTheme.typography.labelLarge)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = timerMode == "POMODORO",
+                        onClick = { timerMode = "POMODORO" }
+                    )
+                    Text("番茄钟")
+                    Spacer(modifier = Modifier.width(16.dp))
+                    RadioButton(
+                        selected = timerMode == "STOPWATCH",
+                        onClick = { timerMode = "STOPWATCH" }
+                    )
+                    Text("正计时")
+                }
+
+                if (timerMode == "POMODORO") {
+                    OutlinedTextField(
+                        value = duration,
+                        onValueChange = { if (it.all { char -> char.isDigit() }) duration = it },
+                        label = { Text("番茄时长 (分钟)") },
+                        singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { 
+                    if (title.isNotBlank()) {
+                        val durationInt = duration.toIntOrNull() ?: 25
+                        val updatedTask = task.copy(
+                            title = title,
+                            description = description,
+                            timerMode = timerMode,
+                            pomodoroDuration = durationInt
+                        )
+                        onUpdate(updatedTask)
+                    }
+                },
+                enabled = title.isNotBlank()
+            ) {
+                Text("保存")
             }
         },
         dismissButton = {

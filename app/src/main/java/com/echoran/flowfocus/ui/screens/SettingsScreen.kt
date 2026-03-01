@@ -108,9 +108,8 @@ fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
     ) {
         Text("设置", fontSize = 24.sp, fontWeight = FontWeight.Bold)
         
