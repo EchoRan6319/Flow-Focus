@@ -10,6 +10,8 @@ import com.echoran.flowfocus.data.model.FocusSessionEntity
 import com.echoran.flowfocus.data.repository.FocusSessionRepository
 import com.echoran.flowfocus.service.TimerService
 import com.echoran.flowfocus.service.StrictModeAccessibilityService
+import androidx.lifecycle.SavedStateHandle
+import com.echoran.flowfocus.data.repository.TaskRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
@@ -18,6 +20,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.echoran.flowfocus.data.repository.SettingsRepository
@@ -34,13 +40,30 @@ enum class TimerState {
 class TimerViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val focusSessionRepository: FocusSessionRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val taskRepository: TaskRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     
+    private val taskId: Long? = savedStateHandle.get<String>("taskId")?.toLongOrNull()
+
+    private val _activeTaskName = MutableStateFlow<String?>(null)
+    val activeTaskName: StateFlow<String?> = _activeTaskName.asStateFlow()
+
+    private val _navigationEvent = MutableSharedFlow<TimerNavigationEvent>()
+    val navigationEvent: SharedFlow<TimerNavigationEvent> = _navigationEvent.asSharedFlow()
+
+    sealed class TimerNavigationEvent {
+        object Exit : TimerNavigationEvent()
+    }
+
     private var sessionStartTime: Long = 0L
 
     private val _timeRemaining = MutableStateFlow(25 * 60L) // 25 mins default for Pomodoro
     val timeRemaining: StateFlow<Long> = _timeRemaining.asStateFlow()
+
+    private val _totalTime = MutableStateFlow(25 * 60L)
+    val totalTime: StateFlow<Long> = _totalTime.asStateFlow()
 
     private val _timerState = MutableStateFlow(TimerState.IDLE)
     val timerState: StateFlow<TimerState> = _timerState.asStateFlow()
@@ -51,6 +74,27 @@ class TimerViewModel @Inject constructor(
     val isStrictModeEnabled = settingsRepository.isStrictModeEnabled
 
     private var timerJob: Job? = null
+
+    init {
+        taskId?.let { id ->
+            viewModelScope.launch {
+                val tasks = taskRepository.getAllTasks().firstOrNull()
+                val task = tasks?.find { it.id == id }
+                task?.let {
+                    _activeTaskName.value = it.title
+                    _timerMode.value = TimerMode.valueOf(it.timerMode)
+                    if (_timerMode.value == TimerMode.POMODORO) {
+                        _timeRemaining.value = it.pomodoroDuration * 60L
+                        _totalTime.value = it.pomodoroDuration * 60L
+                    } else {
+                        _timeRemaining.value = 0L
+                    }
+                    // 自动启动计时
+                    startTimer()
+                }
+            }
+        }
+    }
 
     fun toggleTimer() {
         when (_timerState.value) {
@@ -118,6 +162,11 @@ class TimerViewModel @Inject constructor(
             action = "STOP"
         }
         context.startService(intent)
+
+        // Signal UI to exit focus mode
+        viewModelScope.launch {
+            _navigationEvent.emit(TimerNavigationEvent.Exit)
+        }
     }
 
     fun switchMode(mode: TimerMode) {
@@ -128,6 +177,7 @@ class TimerViewModel @Inject constructor(
 
     private fun resetTimeForCurrentMode() {
         _timeRemaining.value = if (_timerMode.value == TimerMode.POMODORO) 25 * 60L else 0L
+        _totalTime.value = _timeRemaining.value
     }
 
     private fun recordSession() {

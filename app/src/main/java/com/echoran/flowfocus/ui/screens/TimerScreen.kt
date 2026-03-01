@@ -45,12 +45,16 @@ import androidx.compose.material.icons.filled.Info
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimerScreen(
+    taskId: Long? = null,
+    onExit: () -> Unit = {},
     viewModel: TimerViewModel = hiltViewModel(),
     whiteNoiseViewModel: WhiteNoiseViewModel = hiltViewModel()
 ) {
     val timeRemaining by viewModel.timeRemaining.collectAsState()
+    val totalTime by viewModel.totalTime.collectAsState()
     val timerState by viewModel.timerState.collectAsState()
     val timerMode by viewModel.timerMode.collectAsState()
+    val activeTaskName by viewModel.activeTaskName.collectAsState()
     
     val currentTrack by whiteNoiseViewModel.currentTrack.collectAsState()
     val isPlaying by whiteNoiseViewModel.isPlaying.collectAsState()
@@ -58,34 +62,34 @@ fun TimerScreen(
 
     var showNoiseSheet by remember { mutableStateOf(false) }
 
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { event ->
+            if (event is TimerViewModel.TimerNavigationEvent.Exit) {
+                onExit()
+            }
+        }
+    }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Mode Switcher
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Button(
-                onClick = { viewModel.switchMode(TimerMode.POMODORO) },
-                enabled = timerMode != TimerMode.POMODORO && timerState != TimerState.RUNNING
-            ) {
-                Text("番茄钟")
-            }
-            Button(
-                onClick = { viewModel.switchMode(TimerMode.STOPWATCH) },
-                enabled = timerMode != TimerMode.STOPWATCH && timerState != TimerState.RUNNING
-            ) {
-                Text("正计时")
-            }
+        // Task Title
+        activeTaskName?.let {
+            Text(
+                text = "正在专注：$it",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
         }
 
         Spacer(modifier = Modifier.height(48.dp))
 
         // Timer Display
-        TimerDisplay(timeRemaining = timeRemaining, totalTime = if (timerMode == TimerMode.POMODORO) 25 * 60L else 0L)
+        TimerDisplay(timeRemaining = timeRemaining, totalTime = totalTime)
 
         Spacer(modifier = Modifier.height(48.dp))
 

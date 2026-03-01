@@ -11,7 +11,7 @@ import com.echoran.flowfocus.data.model.FocusSessionEntity
 import com.echoran.flowfocus.data.model.TaskEntity
 import com.echoran.flowfocus.data.model.WhitelistedAppEntity
 
-@Database(entities = [TaskEntity::class, FocusSessionEntity::class, WhitelistedAppEntity::class], version = 3, exportSchema = false)
+@Database(entities = [TaskEntity::class, FocusSessionEntity::class, WhitelistedAppEntity::class], version = 4, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
     abstract fun focusSessionDao(): FocusSessionDao
