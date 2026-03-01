@@ -56,9 +56,59 @@ fun SettingsScreen(
     val isStrictModeEnabled by settingsRepository.isStrictModeEnabled.collectAsState(initial = false)
     val isNotificationBlockingEnabled by settingsRepository.isNotificationBlockingEnabled.collectAsState(initial = false)
 
+    var showAccessibilityDialog by remember { mutableStateOf(false) }
+    var showOverlayDialog by remember { mutableStateOf(false) }
+    var showNotificationServiceDialog by remember { mutableStateOf(false) }
+
+    if (showAccessibilityDialog) {
+        AlertDialog(
+            onDismissRequest = { showAccessibilityDialog = false },
+            title = { Text("需要无障碍权限") },
+            text = { Text("严格模式需要无障碍权限来检测当前运行的应用。当您尝试打开非白名单应用时，我们会通过该权限通过系统动作将您带回专注界面。") },
+            confirmButton = {
+                Button(onClick = { 
+                    showAccessibilityDialog = false
+                    viewModel.openAccessibilitySettings() 
+                }) { Text("前往开启") }
+            },
+            dismissButton = { TextButton(onClick = { showAccessibilityDialog = false }) { Text("取消") } }
+        )
+    }
+
+    if (showOverlayDialog) {
+        AlertDialog(
+            onDismissRequest = { showOverlayDialog = false },
+            title = { Text("需要悬浮窗权限") },
+            text = { Text("严格模式需要悬浮窗权限来显示拦截提示和倒计时。如果不开启，您在被拦截时将无法看到反馈信息。") },
+            confirmButton = {
+                Button(onClick = { 
+                    showOverlayDialog = false
+                    viewModel.openOverlaySettings() 
+                }) { Text("前往开启") }
+            },
+            dismissButton = { TextButton(onClick = { showOverlayDialog = false }) { Text("取消") } }
+        )
+    }
+
+    if (showNotificationServiceDialog) {
+        AlertDialog(
+            onDismissRequest = { showNotificationServiceDialog = false },
+            title = { Text("需要通知监听权限") },
+            text = { Text("通知拦截功能需要通知监听权限来读取并自动屏蔽来自非白名单应用的提醒，确保您的专注过程不受干扰。") },
+            confirmButton = {
+                Button(onClick = { 
+                    showNotificationServiceDialog = false
+                    viewModel.openNotificationSettings() 
+                }) { Text("前往开启") }
+            },
+            dismissButton = { TextButton(onClick = { showNotificationServiceDialog = false }) { Text("取消") } }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
@@ -74,7 +124,19 @@ fun SettingsScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("严格模式")
                     Spacer(modifier = Modifier.weight(1f))
-                    Switch(checked = isStrictModeEnabled, onCheckedChange = { viewModel.setStrictModeEnabled(it) })
+                    Switch(checked = isStrictModeEnabled, onCheckedChange = { 
+                        if (it) {
+                            if (!viewModel.isAccessibilityServiceEnabled()) {
+                                showAccessibilityDialog = true
+                            } else if (!viewModel.canDrawOverlays()) {
+                                showOverlayDialog = true
+                            } else {
+                                viewModel.setStrictModeEnabled(true)
+                            }
+                        } else {
+                            viewModel.setStrictModeEnabled(false)
+                        }
+                    })
                 }
                 Text("开启后，在专注期间打开非白名单应用将自动返回本应用。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
                 
@@ -83,7 +145,17 @@ fun SettingsScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("通知拦截")
                     Spacer(modifier = Modifier.weight(1f))
-                    Switch(checked = isNotificationBlockingEnabled, onCheckedChange = { viewModel.setNotificationBlockingEnabled(it) })
+                    Switch(checked = isNotificationBlockingEnabled, onCheckedChange = { 
+                        if (it) {
+                            if (!viewModel.isNotificationServiceEnabled()) {
+                                showNotificationServiceDialog = true
+                            } else {
+                                viewModel.setNotificationBlockingEnabled(true)
+                            }
+                        } else {
+                            viewModel.setNotificationBlockingEnabled(false)
+                        }
+                    })
                 }
                 Text("开启后，在专注期间将自动拦截非白名单应用的通知。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
 
@@ -147,51 +219,37 @@ class SettingsViewModel @Inject constructor(
 ) : androidx.lifecycle.ViewModel() {
 
     fun setStrictModeEnabled(enabled: Boolean) {
-        if (enabled) {
-            if (!isAccessibilityServiceEnabled()) {
-                openAccessibilitySettings()
-                return
-            }
-            if (!canDrawOverlays()) {
-                openOverlaySettings()
-                return
-            }
-        }
         viewModelScope.launch { repository.setStrictModeEnabled(enabled) }
     }
 
     fun setNotificationBlockingEnabled(enabled: Boolean) {
-        if (enabled && !isNotificationServiceEnabled()) {
-            openNotificationSettings()
-            return
-        }
         viewModelScope.launch { repository.setNotificationBlockingEnabled(enabled) }
     }
 
-    private fun isAccessibilityServiceEnabled(): Boolean {
+    fun isAccessibilityServiceEnabled(): Boolean {
         val expectedName = context.packageName + "/" + StrictModeAccessibilityService::class.java.name
         val enabled = Settings.Secure.getString(context.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
         return enabled?.contains(expectedName) == true
     }
 
-    private fun canDrawOverlays(): Boolean {
+    fun canDrawOverlays(): Boolean {
         return Settings.canDrawOverlays(context)
     }
 
-    private fun isNotificationServiceEnabled(): Boolean {
+    fun isNotificationServiceEnabled(): Boolean {
         val enabledListeners = Settings.Secure.getString(context.contentResolver, "enabled_notification_listeners")
         val componentName = context.packageName + "/" + NotificationBlockerService::class.java.name
         return enabledListeners?.contains(componentName) == true
     }
 
-    private fun openAccessibilitySettings() {
+    fun openAccessibilitySettings() {
         val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         context.startActivity(intent)
     }
 
-    private fun openOverlaySettings() {
+    fun openOverlaySettings() {
         val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
             data = android.net.Uri.parse("package:${context.packageName}")
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -199,7 +257,7 @@ class SettingsViewModel @Inject constructor(
         context.startActivity(intent)
     }
 
-    private fun openNotificationSettings() {
+    fun openNotificationSettings() {
         val intent = Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS").apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }

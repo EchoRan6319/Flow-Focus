@@ -28,6 +28,7 @@ fun StatisticsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .padding(16.dp)
     ) {
         Text("专注统计", fontSize = 24.sp, fontWeight = FontWeight.Bold)

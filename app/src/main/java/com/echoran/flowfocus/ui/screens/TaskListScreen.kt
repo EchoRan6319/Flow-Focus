@@ -31,6 +31,7 @@ fun TaskListScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .statusBarsPadding()
                 .padding(16.dp)
         ) {
             Text("待办清单", fontSize = 24.sp, fontWeight = FontWeight.Bold)

@@ -19,6 +19,9 @@ class NotificationBlockerService : NotificationListenerService() {
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     @Inject
+    lateinit var focusManager: FocusManager
+
+    @Inject
     lateinit var settingsRepository: SettingsRepository
 
     @Inject
@@ -29,20 +32,29 @@ class NotificationBlockerService : NotificationListenerService() {
 
         val packageName = sbn.packageName
         
-        // We use the same flag as StrictMode accessibility service
-        if (!StrictModeAccessibilityService.isSessionActive) return
+        // 1. Check if focus session is active via FocusManager
+        if (!focusManager.isSessionActive.value) return
+
+        // 2. Exclude self and system-critical packages
+        if (packageName == this.packageName || 
+            packageName == "com.android.systemui" || 
+            packageName.contains("launcher")) {
+            return
+        }
 
         serviceScope.launch {
+            // 3. Check if notification blocking is enabled in settings
             val isEnabled = settingsRepository.isNotificationBlockingEnabled.first()
             if (!isEnabled) return@launch
 
-            // Check if whitelisted
+            // 4. Check if whitelisted
             val isWhitelisted = whitelistRepository.isAppWhitelisted(packageName)
-            if (isWhitelisted) return@launch
+            if (isWhitelisted) {
+                Log.d("NotificationBlocker", "Whitelisted app: $packageName, allowing notification.")
+                return@launch
+            }
 
-            // Exceptions for Phone and SMS (basic safety)
-            // Note: Different ROMs might have different package names for these, 
-            // but usually they contain "telecom", "telephony", or "mms".
+            // 5. Basic safety exceptions (Phone/SMS)
             if (packageName.contains("telecom") || 
                 packageName.contains("telephony") || 
                 packageName.contains("mms") ||
@@ -50,7 +62,7 @@ class NotificationBlockerService : NotificationListenerService() {
                 return@launch
             }
 
-            // Dismiss the notification
+            // 6. Dismiss the notification
             cancelNotification(sbn.key)
             Log.d("NotificationBlocker", "Blocked notification from: $packageName")
         }

@@ -26,19 +26,22 @@ class StrictModeAccessibilityService : AccessibilityService() {
         private val _currentPackageName = MutableStateFlow<String?>(null)
         val currentPackageName: StateFlow<String?> = _currentPackageName.asStateFlow()
 
-        // Global state for timer to control blocking, updated by TimerService
-        var isSessionActive = false
+// No longer needs static isSessionActive as we use FocusManager
     }
 
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface StrictModeEntryPoint {
         fun getWhitelistRepository(): WhitelistedAppRepository
+        fun getFocusManager(): FocusManager
     }
 
     private lateinit var whitelistRepository: WhitelistedAppRepository
+    private lateinit var focusManager: FocusManager
     private lateinit var overlayManager: StrictModeOverlayManager
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var redirectionJob: kotlinx.coroutines.Job? = null
+    private var lastBlockedPackage: String? = null
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -58,6 +61,7 @@ class StrictModeAccessibilityService : AccessibilityService() {
             StrictModeEntryPoint::class.java
         )
         whitelistRepository = entryPoint.getWhitelistRepository()
+        focusManager = entryPoint.getFocusManager()
         overlayManager = StrictModeOverlayManager(this)
     }
 
@@ -68,9 +72,11 @@ class StrictModeAccessibilityService : AccessibilityService() {
                 _currentPackageName.value = packageName
                 Log.d(TAG, "Active App: $packageName")
                 
-                if (isSessionActive) {
+                if (focusManager.isSessionActive.value) {
                     checkAndBlockApp(packageName)
                 } else {
+                    lastBlockedPackage = null
+                    redirectionJob?.cancel()
                     overlayManager.removeOverlay()
                 }
             }
@@ -78,19 +84,41 @@ class StrictModeAccessibilityService : AccessibilityService() {
     }
 
     private fun checkAndBlockApp(packageName: String) {
+        val isOurApp = packageName == this.packageName
+        
         // Exclude our own app and system UI
-        if (packageName == this.packageName || packageName == "com.android.systemui" || packageName == "com.android.launcher" || packageName.contains("launcher")) {
-            overlayManager.removeOverlay()
-            return
+        if (isOurApp || packageName == "com.android.systemui" || packageName == "com.android.launcher" || packageName.contains("launcher")) {
+            // If it's our app, we should only cancel the redirection if we are NOT currently in a countdown
+            // because showing the overlay might trigger a window event for our own package.
+            if (!isOurApp || (redirectionJob?.isActive != true)) {
+                Log.d(TAG, "Safe App detected: $packageName. Stopping blocking.")
+                lastBlockedPackage = null
+                redirectionJob?.cancel()
+                overlayManager.removeOverlay()
+                return
+            } else {
+                Log.d(TAG, "Ignoring event for our own app during active countdown: $packageName")
+                return
+            }
         }
 
         // Exclude Input Method Editors (Keyboards)
         val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
         val enabledImes = imm.enabledInputMethodList
         if (enabledImes.any { it.packageName == packageName }) {
+            lastBlockedPackage = null
+            redirectionJob?.cancel()
             overlayManager.removeOverlay()
             return
         }
+
+        // If we are already blocking this package, don't restart the countdown
+        if (packageName == lastBlockedPackage && redirectionJob?.isActive == true) {
+            return
+        }
+
+        lastBlockedPackage = packageName
+        redirectionJob?.cancel()
 
         scope.launch {
             val isWhitelisted = whitelistRepository.isAppWhitelisted(packageName)
@@ -107,17 +135,26 @@ class StrictModeAccessibilityService : AccessibilityService() {
                     overlayManager.showOverlay(appName)
                     
                     // Start countdown
-                    launch {
-                        for (i in 3 downTo 1) {
+                    redirectionJob = launch {
+                        for (i in 2 downTo 1) {
                             overlayManager.updateMessage("心流番茄：严格模式\n\n已拦截应用: $appName\n\n将在 $i 秒后返回专注...")
                             kotlinx.coroutines.delay(1000)
                         }
                         
-                        // Automatic redirection to our app after countdown
+                        // 1. First, return to Home to reliably exit the blocked app
+                        performGlobalAction(GLOBAL_ACTION_HOME)
+                        
+                        // 2. Wait a tiny bit for the home transition, then bring our app to front
+                        kotlinx.coroutines.delay(200)
+
+                        // 3. Explicitly launch our MainActivity
                         val intent = android.content.Intent(this@StrictModeAccessibilityService, com.echoran.flowfocus.MainActivity::class.java).apply {
-                            flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                            flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or 
+                                    android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                                    android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
                         }
                         startActivity(intent)
+                        lastBlockedPackage = null
                     }
                 } else {
                     overlayManager.removeOverlay()

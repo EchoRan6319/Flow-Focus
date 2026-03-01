@@ -16,8 +16,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class TimerService : Service() {
+
+    @Inject
+    lateinit var focusManager: FocusManager
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + Job())
     private var timerJob: Job? = null
@@ -43,11 +49,11 @@ class TimerService : Service() {
 
         when (action) {
             "START" -> {
-                StrictModeAccessibilityService.isSessionActive = isStrictMode
+                focusManager.setSessionState(true, isStrictMode)
                 startTimer(timeToStart)
             }
             "STOP" -> {
-                StrictModeAccessibilityService.isSessionActive = false
+                focusManager.setSessionState(false)
                 stopTimer()
             }
         }
@@ -61,7 +67,7 @@ class TimerService : Service() {
         
         startForeground(NOTIFICATION_ID, notification)
         
-        return START_NOT_STICKY
+        return START_STICKY
     }
 
     private fun startTimer(initialTime: Long) {
@@ -112,7 +118,7 @@ class TimerService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        StrictModeAccessibilityService.isSessionActive = false
+        focusManager.setSessionState(false)
         timerJob?.cancel()
     }
 
