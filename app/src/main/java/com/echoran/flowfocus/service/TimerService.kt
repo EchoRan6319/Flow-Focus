@@ -25,10 +25,14 @@ class TimerService : Service() {
     @Inject
     lateinit var focusManager: FocusManager
 
+    @Inject
+    lateinit var settingsRepository: com.echoran.flowfocus.data.repository.SettingsRepository
+
     private val serviceScope = CoroutineScope(Dispatchers.Main + Job())
     private var timerJob: Job? = null
     private var timeRemaining = 0L
     private var currentMode = TimerMode.POMODORO
+    private var isHideFromRecents = false
 
     companion object {
         const val CHANNEL_ID = "TimerServiceChannel"
@@ -40,12 +44,26 @@ class TimerService : Service() {
         createNotificationChannel()
     }
 
+    // Store strict mode state
+    private var isStrictMode = false
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action
         val timeToStart = intent?.getLongExtra("TIME_REMAINING", 0L) ?: 0L
-        val isStrictMode = intent?.getBooleanExtra("STRICT_MODE", false) ?: false
+        val strictModeFromIntent = intent?.getBooleanExtra("STRICT_MODE", false) ?: false
         val modeStr = intent?.getStringExtra("TIMER_MODE") ?: TimerMode.POMODORO.name
         currentMode = TimerMode.valueOf(modeStr)
+
+        // Update strict mode state if provided in intent
+        if (intent != null && intent.hasExtra("STRICT_MODE")) {
+            isStrictMode = strictModeFromIntent
+        }
+
+        serviceScope.launch {
+            settingsRepository.isHideFromRecentsEnabled.collect {
+                isHideFromRecents = it
+            }
+        }
 
         when (action) {
             "START" -> {

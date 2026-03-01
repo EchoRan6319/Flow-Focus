@@ -42,6 +42,7 @@ class TimerViewModel @Inject constructor(
     private val focusSessionRepository: FocusSessionRepository,
     private val settingsRepository: SettingsRepository,
     private val taskRepository: TaskRepository,
+    val whitelistedAppRepository: com.echoran.flowfocus.data.repository.WhitelistedAppRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     

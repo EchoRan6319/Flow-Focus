@@ -55,6 +55,7 @@ fun SettingsScreen(
 
     val isStrictModeEnabled by settingsRepository.isStrictModeEnabled.collectAsState(initial = false)
     val isNotificationBlockingEnabled by settingsRepository.isNotificationBlockingEnabled.collectAsState(initial = false)
+    val isHideFromRecentsEnabled by settingsRepository.isHideFromRecentsEnabled.collectAsState(initial = false)
 
     var showAccessibilityDialog by remember { mutableStateOf(false) }
     var showOverlayDialog by remember { mutableStateOf(false) }
@@ -159,6 +160,17 @@ fun SettingsScreen(
                 Text("开启后，在专注期间将自动拦截非白名单应用的通知。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
 
                 Spacer(modifier = Modifier.height(16.dp))
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("后台隐藏")
+                    Spacer(modifier = Modifier.weight(1f))
+                    Switch(checked = isHideFromRecentsEnabled, onCheckedChange = { 
+                        viewModel.setHideFromRecentsEnabled(it)
+                    })
+                }
+                Text("开启后，在严格模式期间本应用将在最近任务中隐藏。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
                     onClick = onNavigateToWhitelist,
@@ -223,6 +235,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setNotificationBlockingEnabled(enabled: Boolean) {
         viewModelScope.launch { repository.setNotificationBlockingEnabled(enabled) }
+    }
+
+    fun setHideFromRecentsEnabled(enabled: Boolean) {
+        viewModelScope.launch { repository.setHideFromRecentsEnabled(enabled) }
     }
 
     fun isAccessibilityServiceEnabled(): Boolean {

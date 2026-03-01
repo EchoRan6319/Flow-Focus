@@ -84,10 +84,20 @@ class StrictModeAccessibilityService : AccessibilityService() {
         
         Log.d(TAG, "DEBUG: checkAndBlockApp called for $packageName. Our package: ${this.packageName}. isOurApp: $isOurApp")
 
-        // Exclude our own app and system UI/Launchers/System Server
-        if (isOurApp || packageName == "android" || packageName == "com.android.systemui" || packageName == "com.android.launcher" || 
-            packageName.contains("launcher", ignoreCase = true) || packageName.contains("trebuchet", ignoreCase = true)) {
+        // Exclude only our own app and system UI/System Server
+        if (isOurApp || packageName == "android" || packageName == "com.android.systemui") {
             Log.d(TAG, "DEBUG: Package $packageName is SAFE. Ignoring.")
+            return
+        }
+        
+        // Block launchers and recent apps
+        if (packageName.contains("launcher", ignoreCase = true) || 
+            packageName.contains("trebuchet", ignoreCase = true) ||
+            packageName == "com.android.launcher3" ||
+            packageName == "com.google.android.apps.nexuslauncher" ||
+            packageName == "com.android.systemui.recents") {
+            Log.d(TAG, "DEBUG: Blocking launcher or recent apps: $packageName")
+            launchInterceptActivity("系统桌面")
             return
         }
 

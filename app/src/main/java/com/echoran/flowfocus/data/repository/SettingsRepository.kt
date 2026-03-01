@@ -27,6 +27,7 @@ class SettingsRepository @Inject constructor(
     // Refinement Keys
     private val NOTIFICATION_BLOCKING_ENABLED = booleanPreferencesKey("notification_blocking_enabled")
     private val STRICT_MODE_ENABLED = booleanPreferencesKey("strict_mode_enabled")
+    private val HIDE_FROM_RECENTS_ENABLED = booleanPreferencesKey("hide_from_recents_enabled")
     private val CUSTOM_WHITE_NOISE_TRACKS = stringSetPreferencesKey("custom_white_noise_tracks")
 
     val webDavServerUrl: Flow<String> = dataStore.data.map { it[WEBDAV_SERVER_URL] ?: "https://dav.jianguoyun.com/dav/" }
@@ -37,6 +38,7 @@ class SettingsRepository @Inject constructor(
     // Refinement Flows
     val isNotificationBlockingEnabled: Flow<Boolean> = dataStore.data.map { it[NOTIFICATION_BLOCKING_ENABLED] ?: false }
     val isStrictModeEnabled: Flow<Boolean> = dataStore.data.map { it[STRICT_MODE_ENABLED] ?: false }
+    val isHideFromRecentsEnabled: Flow<Boolean> = dataStore.data.map { it[HIDE_FROM_RECENTS_ENABLED] ?: false }
     val customWhiteNoiseTracks: Flow<Set<String>> = dataStore.data.map { it[CUSTOM_WHITE_NOISE_TRACKS] ?: emptySet() }
 
     suspend fun updateWebDavSettings(url: String, user: String, pass: String, enabled: Boolean) {
@@ -54,6 +56,10 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setStrictModeEnabled(enabled: Boolean) {
         dataStore.edit { it[STRICT_MODE_ENABLED] = enabled }
+    }
+
+    suspend fun setHideFromRecentsEnabled(enabled: Boolean) {
+        dataStore.edit { it[HIDE_FROM_RECENTS_ENABLED] = enabled }
     }
 
     suspend fun addCustomWhiteNoise(uri: String) {
