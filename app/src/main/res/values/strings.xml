@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">心流番茄</string>
+    <string name="accessibility_service_description">Used to monitor the current foreground application for Strict Mode</string>
+</resources>

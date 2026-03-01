@@ -1,0 +1,151 @@
+﻿--------- beginning of crash
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: FATAL EXCEPTION: highpool[6]
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: Process: com.google.android.gms.persistent, PID: 1578
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: bgpo: fvqc
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at bgqc.get(:com.google.android.gms@253434038@25.34.34 (260800-800653487):34)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at dagger.internal.DoubleCheck.c(:com.google.android.gms@253434038@25.34.34 (260800-800653487):10)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at dagger.internal.DoubleCheck.get(:com.google.android.gms@253434038@25.34.34 (260800-800653487):7)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at bgpe.f(:com.google.android.gms@253434038@25.34.34 (260800-800653487):18)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at fxjl.a(:com.google.android.gms@253434038@25.34.34 (260800-800653487):3)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at fxjv.i(:com.google.android.gms@253434038@25.34.34 (260800-800653487):20)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at fxjo.j(:com.google.android.gms@253434038@25.34.34 (260800-800653487):3)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at fxjl.c(:com.google.android.gms@253434038@25.34.34 (260800-800653487):31)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at fxjv.c(:com.google.android.gms@253434038@25.34.34 (260800-800653487):8)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at fxjr.run(:com.google.android.gms@253434038@25.34.34 (260800-800653487):11)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at bbiq.c(:com.google.android.gms@253434038@25.34.34 (260800-800653487):50)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at bbiq.run(:com.google.android.gms@253434038@25.34.34 (260800-800653487):89)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1154)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:652)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at bboi.run(:com.google.android.gms@253434038@25.34.34 (260800-800653487):8)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at java.lang.Thread.run(Thread.java:1563)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	Suppressed: gdmr: 
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 		at tk_trace.crisisalerts-CrisisAlertsPersistentChimeraService_onCreate(Unknown Source:0)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: Caused by: fvqc
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at fvqa.a(:com.google.android.gms@253434038@25.34.34 (260800-800653487):85)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at fvqa.b(:com.google.android.gms@253434038@25.34.34 (260800-800653487):1)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	at bgqc.get(:com.google.android.gms@253434038@25.34.34 (260800-800653487):23)
+02-27 14:36:00.379  1578  2895 E AndroidRuntime: 	... 15 more
+02-27 15:05:26.391  1413  1561 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 1561 (gd_stack_thread), pid 1413 (droid.bluetooth)
+02-27 16:07:26.449  8071  8071 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+02-27 16:07:26.449  8071  8071 F DEBUG   : Build fingerprint: 'google/sdk_gphone64_x86_64/emu64xa:16/BE4B.251210.005/14574095:user/release-keys'
+02-27 16:07:26.450  8071  8071 F DEBUG   : Kernel Release: '6.12.38-android16-5-gbb9513914902-ab13996879'
+02-27 16:07:26.450  8071  8071 F DEBUG   : Revision: '0'
+02-27 16:07:26.450  8071  8071 F DEBUG   : ABI: 'x86_64'
+02-27 16:07:26.450  8071  8071 F DEBUG   : Timestamp: 2026-02-27 16:07:19.297979500+0000
+02-27 16:07:26.450  8071  8071 F DEBUG   : Process uptime: 0s
+02-27 16:07:26.450  8071  8071 F DEBUG   : Executable: /system/bin/app_process64
+02-27 16:07:26.450  8071  8071 F DEBUG   : Cmdline: com.google.android.bluetooth
+02-27 16:07:26.450  8071  8071 F DEBUG   : pid: 1413, tid: 1561, name: gd_stack_thread  >>> com.google.android.bluetooth <<<
+02-27 16:07:26.450  8071  8071 F DEBUG   : uid: 1002
+02-27 16:07:26.450  8071  8071 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+02-27 16:07:26.450  8071  8071 F DEBUG   : Abort message: 'system/gd/hci/hci_layer.cc:537 on_hardware_error: Hardware Error Event with code 0x42'
+02-27 16:07:26.450  8071  8071 F DEBUG   :     rax 0000000000000000  rbx 0000000000000585  rcx 00007a3f434a1ce4  rdx 0000000000000006
+02-27 16:07:26.450  8071  8071 F DEBUG   :     r8  00007a3c01c2b440  r9  00007a3c01c2b440  r10 00007a3c01c2b400  r11 0000000000000203
+02-27 16:07:26.450  8071  8071 F DEBUG   :     r12 00007a3cbc206560  r13 00007a3c020bfca0  r14 0000000000000619  r15 00007a3c8ac09e00
+02-27 16:07:26.450  8071  8071 F DEBUG   :     rdi 0000000000000585  rsi 0000000000000619
+02-27 16:07:26.450  8071  8071 F DEBUG   :     rbp 00007a3c01c2b4a0  rsp 00007a3c01c2b400  rip 00007a3f434a1ce4  err 0000000000000004
+02-27 16:07:26.450  8071  8071 F DEBUG   : 14 total frames
+02-27 16:07:26.451  8071  8071 F DEBUG   : backtrace:
+02-27 16:07:26.451  8071  8071 F DEBUG   :       #00 pc 000000000006fce4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+196) (BuildId: 3f8afd2a8485f380e843af6d787a9af4)
+02-27 16:07:26.451  8071  8071 F DEBUG   :       #01 pc 00000000008c61ae  /apex/com.android.art/lib64/libart.so (art::Runtime::Abort(char const*)+1614) (BuildId: 443d8619760adcc9570ec4eb148f8292)
+02-27 16:07:26.451  8071  8071 F DEBUG   :       #02 pc 00000000000167fe  /apex/com.android.art/lib64/libbase.so (android::base::SetAborter(std::__1::function<void (char const*)>&&)::$_0::__invoke(char const*)+62) (BuildId: 2e4622e488810f1c2a1ab8c30d10a71a)
+02-27 16:07:26.451  8071  8071 F DEBUG   :       #03 pc 0000000000e3095d  /apex/com.android.bt/lib64/libbluetooth_jni.so (bluetooth::log_internal::vlog(bluetooth::log_internal::Level, char const*, bluetooth::log_internal::source_location, std::__1::basic_string_view<char, std::__1::char_traits<char>>, std::__1::basic_format_args<std::__1::basic_format_context<std::__1::back_insert_iterator<std::__1::__format::__output_buffer<char>>, char>>)+925) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+02-27 16:07:26.451  8071  8071 F DEBUG   :       #04 pc 0000000000ba0666  /apex/com.android.bt/lib64/libbluetooth_jni.so (void bluetooth::log::fatal<unsigned char>(std::__1::basic_format_string<char, std::__1::type_identity<unsigned char>::type>, unsigned char&&, bluetooth::log_internal::source_location)+118) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+02-27 16:07:26.451  8071  8071 F DEBUG   :       #05 pc 0000000000b9a0f8  /apex/com.android.bt/lib64/libbluetooth_jni.so (bluetooth::hci::HciLayer::impl::on_hci_event(bluetooth::hci::EventView)+26248) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+02-27 16:07:26.451  8071  8071 F DEBUG   :       #06 pc 0000000000b9a40e  /apex/com.android.bt/lib64/libbluetooth_jni.so (void base::internal::FunctorTraits<void (bluetooth::hci::HciLayer::impl::*)(bluetooth::hci::EventView), void>::Invoke<void (bluetooth::hci::HciLayer::impl::*)(bluetooth::hci::EventView), bluetooth::hci::HciLayer::impl*, bluetooth::hci::EventView>(void (bluetooth::hci::HciLayer::impl::*)(bluetooth::hci::EventView), bluetooth::hci::HciLayer::impl*&&, bluetooth::hci::EventView&&)+302) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+02-27 16:07:26.451  8071  8071 F DEBUG   :       #07 pc 0000000000b9a2c4  /apex/com.android.bt/lib64/libbluetooth_jni.so (base::internal::Invoker<base::internal::BindState<void (bluetooth::hci::HciLayer::impl::*)(bluetooth::hci::EventView), base::internal::UnretainedWrapper<bluetooth::hci::HciLayer::impl>, bluetooth::hci::EventView>, void ()>::RunOnce(base::internal::BindStateBase*)+52) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+02-27 16:07:26.451  8071  8071 F DEBUG   :       #08 pc 0000000000a64630  /apex/com.android.bt/lib64/libbluetooth_jni.so (bluetooth::os::Handler::handle_next_event()+352) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+02-27 16:07:26.451  8071  8071 F DEBUG   :       #09 pc 0000000000a662bb  /apex/com.android.bt/lib64/libbluetooth_jni.so (bluetooth::os::Reactor::Run()+1051) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+02-27 16:07:26.451  8071  8071 F DEBUG   :       #10 pc 0000000000a66ff9  /apex/com.android.bt/lib64/libbluetooth_jni.so (bluetooth::os::Thread::run(bluetooth::os::Thread::Priority)+329) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+02-27 16:07:26.451  8071  8071 F DEBUG   :       #11 pc 0000000000a6719c  /apex/com.android.bt/lib64/libbluetooth_jni.so (void* std::__1::__thread_proxy[abi:nn210000]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, void (bluetooth::os::Thread::*)(bluetooth::os::Thread::Priority), bluetooth::os::Thread*, bluetooth::os::Thread::Priority>>(void*)+60) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+02-27 16:07:26.451  8071  8071 F DEBUG   :       #12 pc 0000000000080daf  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*) (.__uniq.67847048707805468364044055584648682506)+63) (BuildId: 3f8afd2a8485f380e843af6d787a9af4)
+02-27 16:07:26.451  8071  8071 F DEBUG   :       #13 pc 00000000000734fd  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+61) (BuildId: 3f8afd2a8485f380e843af6d787a9af4)
+02-27 17:02:16.305  8168  8230 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 8230 (gd_stack_thread), pid 8168 (droid.bluetooth)
+03-01 10:21:29.212  9739  9739 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+03-01 10:21:29.212  9739  9739 F DEBUG   : Build fingerprint: 'google/sdk_gphone64_x86_64/emu64xa:16/BE4B.251210.005/14574095:user/release-keys'
+03-01 10:21:29.212  9739  9739 F DEBUG   : Kernel Release: '6.12.38-android16-5-gbb9513914902-ab13996879'
+03-01 10:21:29.212  9739  9739 F DEBUG   : Revision: '0'
+03-01 10:21:29.212  9739  9739 F DEBUG   : ABI: 'x86_64'
+03-01 10:21:29.212  9739  9739 F DEBUG   : Timestamp: 2026-03-01 10:21:22.640433200+0000
+03-01 10:21:29.212  9739  9739 F DEBUG   : Process uptime: 0s
+03-01 10:21:29.212  9739  9739 F DEBUG   : Executable: /system/bin/app_process64
+03-01 10:21:29.212  9739  9739 F DEBUG   : Cmdline: com.google.android.bluetooth
+03-01 10:21:29.212  9739  9739 F DEBUG   : pid: 8168, tid: 8230, name: gd_stack_thread  >>> com.google.android.bluetooth <<<
+03-01 10:21:29.212  9739  9739 F DEBUG   : uid: 1002
+03-01 10:21:29.212  9739  9739 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+03-01 10:21:29.212  9739  9739 F DEBUG   : Abort message: 'system/gd/hci/hci_layer.cc:537 on_hardware_error: Hardware Error Event with code 0x42'
+03-01 10:21:29.212  9739  9739 F DEBUG   :     rax 0000000000000000  rbx 0000000000001fe8  rcx 00007a3f434a1ce4  rdx 0000000000000006
+03-01 10:21:29.212  9739  9739 F DEBUG   :     r8  00007a3c00714440  r9  00007a3c00714440  r10 00007a3c00714400  r11 0000000000000203
+03-01 10:21:29.212  9739  9739 F DEBUG   :     r12 00007a3cbc206560  r13 00007a3c01d02ca0  r14 0000000000002026  r15 00007a3c8ac09e00
+03-01 10:21:29.212  9739  9739 F DEBUG   :     rdi 0000000000001fe8  rsi 0000000000002026
+03-01 10:21:29.212  9739  9739 F DEBUG   :     rbp 00007a3c007144a0  rsp 00007a3c00714400  rip 00007a3f434a1ce4  err 0000000000000004
+03-01 10:21:29.212  9739  9739 F DEBUG   : 14 total frames
+03-01 10:21:29.212  9739  9739 F DEBUG   : backtrace:
+03-01 10:21:29.212  9739  9739 F DEBUG   :       #00 pc 000000000006fce4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+196) (BuildId: 3f8afd2a8485f380e843af6d787a9af4)
+03-01 10:21:29.212  9739  9739 F DEBUG   :       #01 pc 00000000008c61ae  /apex/com.android.art/lib64/libart.so (art::Runtime::Abort(char const*)+1614) (BuildId: 443d8619760adcc9570ec4eb148f8292)
+03-01 10:21:29.212  9739  9739 F DEBUG   :       #02 pc 00000000000167fe  /apex/com.android.art/lib64/libbase.so (android::base::SetAborter(std::__1::function<void (char const*)>&&)::$_0::__invoke(char const*)+62) (BuildId: 2e4622e488810f1c2a1ab8c30d10a71a)
+03-01 10:21:29.212  9739  9739 F DEBUG   :       #03 pc 0000000000e3095d  /apex/com.android.bt/lib64/libbluetooth_jni.so (bluetooth::log_internal::vlog(bluetooth::log_internal::Level, char const*, bluetooth::log_internal::source_location, std::__1::basic_string_view<char, std::__1::char_traits<char>>, std::__1::basic_format_args<std::__1::basic_format_context<std::__1::back_insert_iterator<std::__1::__format::__output_buffer<char>>, char>>)+925) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+03-01 10:21:29.212  9739  9739 F DEBUG   :       #04 pc 0000000000ba0666  /apex/com.android.bt/lib64/libbluetooth_jni.so (void bluetooth::log::fatal<unsigned char>(std::__1::basic_format_string<char, std::__1::type_identity<unsigned char>::type>, unsigned char&&, bluetooth::log_internal::source_location)+118) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+03-01 10:21:29.212  9739  9739 F DEBUG   :       #05 pc 0000000000b9a0f8  /apex/com.android.bt/lib64/libbluetooth_jni.so (bluetooth::hci::HciLayer::impl::on_hci_event(bluetooth::hci::EventView)+26248) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+03-01 10:21:29.212  9739  9739 F DEBUG   :       #06 pc 0000000000b9a40e  /apex/com.android.bt/lib64/libbluetooth_jni.so (void base::internal::FunctorTraits<void (bluetooth::hci::HciLayer::impl::*)(bluetooth::hci::EventView), void>::Invoke<void (bluetooth::hci::HciLayer::impl::*)(bluetooth::hci::EventView), bluetooth::hci::HciLayer::impl*, bluetooth::hci::EventView>(void (bluetooth::hci::HciLayer::impl::*)(bluetooth::hci::EventView), bluetooth::hci::HciLayer::impl*&&, bluetooth::hci::EventView&&)+302) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+03-01 10:21:29.212  9739  9739 F DEBUG   :       #07 pc 0000000000b9a2c4  /apex/com.android.bt/lib64/libbluetooth_jni.so (base::internal::Invoker<base::internal::BindState<void (bluetooth::hci::HciLayer::impl::*)(bluetooth::hci::EventView), base::internal::UnretainedWrapper<bluetooth::hci::HciLayer::impl>, bluetooth::hci::EventView>, void ()>::RunOnce(base::internal::BindStateBase*)+52) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+03-01 10:21:29.212  9739  9739 F DEBUG   :       #08 pc 0000000000a64630  /apex/com.android.bt/lib64/libbluetooth_jni.so (bluetooth::os::Handler::handle_next_event()+352) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+03-01 10:21:29.212  9739  9739 F DEBUG   :       #09 pc 0000000000a662bb  /apex/com.android.bt/lib64/libbluetooth_jni.so (bluetooth::os::Reactor::Run()+1051) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+03-01 10:21:29.212  9739  9739 F DEBUG   :       #10 pc 0000000000a66ff9  /apex/com.android.bt/lib64/libbluetooth_jni.so (bluetooth::os::Thread::run(bluetooth::os::Thread::Priority)+329) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+03-01 10:21:29.212  9739  9739 F DEBUG   :       #11 pc 0000000000a6719c  /apex/com.android.bt/lib64/libbluetooth_jni.so (void* std::__1::__thread_proxy[abi:nn210000]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, void (bluetooth::os::Thread::*)(bluetooth::os::Thread::Priority), bluetooth::os::Thread*, bluetooth::os::Thread::Priority>>(void*)+60) (BuildId: 126c065423e2ff924675fff9c1d10f0f)
+03-01 10:21:29.212  9739  9739 F DEBUG   :       #12 pc 0000000000080daf  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*) (.__uniq.67847048707805468364044055584648682506)+63) (BuildId: 3f8afd2a8485f380e843af6d787a9af4)
+03-01 10:21:29.212  9739  9739 F DEBUG   :       #13 pc 00000000000734fd  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+61) (BuildId: 3f8afd2a8485f380e843af6d787a9af4)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: FATAL EXCEPTION: main
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: Process: com.echoran.flowfocus, PID: 10435
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: java.lang.RuntimeException: Unable to instantiate application com.echoran.flowfocus.FlowFocusApp package com.echoran.flowfocus
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at android.app.LoadedApk.throwForNewApplicationFailure(LoadedApk.java:1599)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at android.app.LoadedApk.onNewApplicationFailed(LoadedApk.java:1589)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1554)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1482)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at android.app.ActivityThread.handleBindApplication(ActivityThread.java:8091)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at android.app.ActivityThread.-$$Nest$mhandleBindApplication(Unknown Source:0)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2690)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:132)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at android.os.Looper.dispatchMessage(Looper.java:333)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:263)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:367)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:9287)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:566)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:929)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: Caused by: java.lang.ClassNotFoundException: Didn't find class "com.echoran.flowfocus.FlowFocusApp" on path: DexPathList[[zip file "/data/app/~~YsZZdCBnVT9aWCTRj0_tnw==/com.echoran.flowfocus-S-c_YPY5-k80nlxrhm-gMg==/base.apk"],nativeLibraryDirectories=[/data/app/~~YsZZdCBnVT9aWCTRj0_tnw==/com.echoran.flowfocus-S-c_YPY5-k80nlxrhm-gMg==/lib/x86_64, /data/app/~~YsZZdCBnVT9aWCTRj0_tnw==/com.echoran.flowfocus-S-c_YPY5-k80nlxrhm-gMg==/base.apk!/lib/x86_64, /system/lib64, /system_ext/lib64]]
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at dalvik.system.BaseDexClassLoader.findClass(BaseDexClassLoader.java:259)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at java.lang.ClassLoader.loadClass(ClassLoader.java:642)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at java.lang.ClassLoader.loadClass(ClassLoader.java:578)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at android.app.AppComponentFactory.instantiateApplication(AppComponentFactory.java:78)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at androidx.core.app.CoreComponentFactory.instantiateApplication(CoreComponentFactory.java:51)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at android.app.Instrumentation.newApplication(Instrumentation.java:1360)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1550)
+03-01 10:24:59.450 10435 10435 E AndroidRuntime: 	... 12 more
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: FATAL EXCEPTION: main
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: Process: com.echoran.flowfocus, PID: 10491
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: java.lang.RuntimeException: Unable to instantiate application com.echoran.flowfocus.FlowFocusApp package com.echoran.flowfocus
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at android.app.LoadedApk.throwForNewApplicationFailure(LoadedApk.java:1599)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at android.app.LoadedApk.onNewApplicationFailed(LoadedApk.java:1589)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1554)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1482)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at android.app.ActivityThread.handleBindApplication(ActivityThread.java:8091)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at android.app.ActivityThread.-$$Nest$mhandleBindApplication(Unknown Source:0)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2690)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:132)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at android.os.Looper.dispatchMessage(Looper.java:333)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:263)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:367)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:9287)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:566)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:929)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: Caused by: java.lang.ClassNotFoundException: Didn't find class "com.echoran.flowfocus.FlowFocusApp" on path: DexPathList[[zip file "/data/app/~~YsZZdCBnVT9aWCTRj0_tnw==/com.echoran.flowfocus-S-c_YPY5-k80nlxrhm-gMg==/base.apk"],nativeLibraryDirectories=[/data/app/~~YsZZdCBnVT9aWCTRj0_tnw==/com.echoran.flowfocus-S-c_YPY5-k80nlxrhm-gMg==/lib/x86_64, /data/app/~~YsZZdCBnVT9aWCTRj0_tnw==/com.echoran.flowfocus-S-c_YPY5-k80nlxrhm-gMg==/base.apk!/lib/x86_64, /system/lib64, /system_ext/lib64]]
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at dalvik.system.BaseDexClassLoader.findClass(BaseDexClassLoader.java:259)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at java.lang.ClassLoader.loadClass(ClassLoader.java:642)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at java.lang.ClassLoader.loadClass(ClassLoader.java:578)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at android.app.AppComponentFactory.instantiateApplication(AppComponentFactory.java:78)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at androidx.core.app.CoreComponentFactory.instantiateApplication(CoreComponentFactory.java:51)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at android.app.Instrumentation.newApplication(Instrumentation.java:1360)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	at android.app.LoadedApk.makeApplicationInner(LoadedApk.java:1550)
+03-01 10:25:01.015 10491 10491 E AndroidRuntime: 	... 12 more

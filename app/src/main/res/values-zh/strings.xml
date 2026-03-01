@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">心流番茄</string>
+    <string name="accessibility_service_description">用于“严格模式”监测当前运行的应用以进行专注力拦截</string>
+</resources>
