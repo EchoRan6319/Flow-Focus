@@ -58,6 +58,13 @@
             </intent-filter>
         </service>
 
+        <activity
+            android:name=".ui.InterceptActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@style/Theme.FlowFocus" />
+
     </application>
 
 </manifest>

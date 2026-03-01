@@ -38,10 +38,9 @@ class StrictModeAccessibilityService : AccessibilityService() {
 
     private lateinit var whitelistRepository: WhitelistedAppRepository
     private lateinit var focusManager: FocusManager
-    private lateinit var overlayManager: StrictModeOverlayManager
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private var redirectionJob: kotlinx.coroutines.Job? = null
     private var lastBlockedPackage: String? = null
+    private var lastInterceptTimestamp: Long = 0
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -62,7 +61,6 @@ class StrictModeAccessibilityService : AccessibilityService() {
         )
         whitelistRepository = entryPoint.getWhitelistRepository()
         focusManager = entryPoint.getFocusManager()
-        overlayManager = StrictModeOverlayManager(this)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -72,12 +70,10 @@ class StrictModeAccessibilityService : AccessibilityService() {
                 _currentPackageName.value = packageName
                 Log.d(TAG, "Active App: $packageName")
                 
-                if (focusManager.isSessionActive.value) {
+                if (focusManager.isStrictMode.value) {
                     checkAndBlockApp(packageName)
                 } else {
                     lastBlockedPackage = null
-                    redirectionJob?.cancel()
-                    overlayManager.removeOverlay()
                 }
             }
         }
@@ -86,45 +82,52 @@ class StrictModeAccessibilityService : AccessibilityService() {
     private fun checkAndBlockApp(packageName: String) {
         val isOurApp = packageName == this.packageName
         
-        // Exclude our own app and system UI
-        if (isOurApp || packageName == "com.android.systemui" || packageName == "com.android.launcher" || packageName.contains("launcher")) {
-            // If it's our app, we should only cancel the redirection if we are NOT currently in a countdown
-            // because showing the overlay might trigger a window event for our own package.
-            if (!isOurApp || (redirectionJob?.isActive != true)) {
-                Log.d(TAG, "Safe App detected: $packageName. Stopping blocking.")
-                lastBlockedPackage = null
-                redirectionJob?.cancel()
-                overlayManager.removeOverlay()
-                return
-            } else {
-                Log.d(TAG, "Ignoring event for our own app during active countdown: $packageName")
+        Log.d(TAG, "DEBUG: checkAndBlockApp called for $packageName. Our package: ${this.packageName}. isOurApp: $isOurApp")
+
+        // Exclude our own app and system UI/Launchers/System Server
+        if (isOurApp || packageName == "android" || packageName == "com.android.systemui" || packageName == "com.android.launcher" || 
+            packageName.contains("launcher", ignoreCase = true) || packageName.contains("trebuchet", ignoreCase = true)) {
+            Log.d(TAG, "DEBUG: Package $packageName is SAFE. Ignoring.")
+            return
+        }
+
+        // Whitelist ALL System Apps (Safe Guard for most ROMs)
+        try {
+            val appInfo = packageManager.getApplicationInfo(packageName, 0)
+            if ((appInfo.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0 || 
+                (appInfo.flags and android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
+                Log.d(TAG, "DEBUG: Package $packageName is a SYSTEM APP. Ignoring.")
                 return
             }
+        } catch (e: Exception) {
+            // Package might be transient or gone
         }
 
         // Exclude Input Method Editors (Keyboards)
         val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
         val enabledImes = imm.enabledInputMethodList
         if (enabledImes.any { it.packageName == packageName }) {
-            lastBlockedPackage = null
-            redirectionJob?.cancel()
-            overlayManager.removeOverlay()
+            Log.d(TAG, "DEBUG: Package $packageName is an IME. Ignoring.")
             return
         }
 
-        // If we are already blocking this package, don't restart the countdown
-        if (packageName == lastBlockedPackage && redirectionJob?.isActive == true) {
+        // Avoid infinite launch loops
+        val now = System.currentTimeMillis()
+        if (packageName == lastBlockedPackage && (now - lastInterceptTimestamp < 2000)) {
+            Log.d(TAG, "DEBUG: Package $packageName recently blocked. Throttling.")
             return
         }
 
         lastBlockedPackage = packageName
-        redirectionJob?.cancel()
+        lastInterceptTimestamp = now
 
         scope.launch {
             val isWhitelisted = whitelistRepository.isAppWhitelisted(packageName)
-            launch(Dispatchers.Main) {
-                if (!isWhitelisted) {
-                    Log.d(TAG, "Blocking App: $packageName")
+            Log.d(TAG, "DEBUG: Package $packageName whitelist status: $isWhitelisted")
+            if (!isWhitelisted) {
+                Log.d(TAG, "DEBUG: BLOCKING non-whitelisted app: $packageName")
+                
+                launch(Dispatchers.Main) {
                     val pm = packageManager
                     val appName = try {
                         pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0)).toString()
@@ -132,35 +135,24 @@ class StrictModeAccessibilityService : AccessibilityService() {
                         packageName
                     }
                     
-                    overlayManager.showOverlay(appName)
+                    // Add a Toast for immediate visual confirmation since Logcat is failing the user
+                    android.widget.Toast.makeText(applicationContext, "严格模式拦截: $appName ($packageName)", android.widget.Toast.LENGTH_SHORT).show()
                     
-                    // Start countdown
-                    redirectionJob = launch {
-                        for (i in 2 downTo 1) {
-                            overlayManager.updateMessage("心流番茄：严格模式\n\n已拦截应用: $appName\n\n将在 $i 秒后返回专注...")
-                            kotlinx.coroutines.delay(1000)
-                        }
-                        
-                        // 1. First, return to Home to reliably exit the blocked app
-                        performGlobalAction(GLOBAL_ACTION_HOME)
-                        
-                        // 2. Wait a tiny bit for the home transition, then bring our app to front
-                        kotlinx.coroutines.delay(200)
-
-                        // 3. Explicitly launch our MainActivity
-                        val intent = android.content.Intent(this@StrictModeAccessibilityService, com.echoran.flowfocus.MainActivity::class.java).apply {
-                            flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or 
-                                    android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP or
-                                    android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
-                        }
-                        startActivity(intent)
-                        lastBlockedPackage = null
-                    }
-                } else {
-                    overlayManager.removeOverlay()
+                    launchInterceptActivity(appName)
                 }
             }
         }
+    }
+
+    private fun launchInterceptActivity(appName: String) {
+        Log.d(TAG, "Launching InterceptActivity for $appName")
+        val intent = android.content.Intent(this, com.echoran.flowfocus.ui.InterceptActivity::class.java).apply {
+            putExtra("EXTRA_APP_NAME", appName)
+            flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or 
+                    android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                    android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        startActivity(intent)
     }
 
     override fun onInterrupt() {
